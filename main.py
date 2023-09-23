@@ -31,21 +31,29 @@ class Player(pygame.sprite.Sprite):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
+        self.movex = 0 # move along X
+        self.movey = 0 # move along Y
+        self.frame = 0
         self.images = []
-        for i in range(1, 5):
-            img = pygame.image.load(os.path.join('images', 'hero' + str(i) + '.png')).convert()
-            img.convert_alpha()  # optimise alpha
-            img.set_colorkey(ALPHA)  # set alpha
-            self.images.append(img)
-            self.image = self.images[0]
-            self.rect = self.image.get_rect()
 
-
+        img = pygame.image.load(os.path.join('img', 'penguin_walk04.png')).convert()
+        self.images.append(img)
+        self.image = self.images[0]
+        self.rect = self.image.get_rect()
+    def move(self, x, y):
+        self.movex += x
+        self.movey += y
+    def gravity(self):
+        self.movey += 3.2 # how fast player falls
+        
+        if self.rect.y > worldy and self.movey >= 0:
+            self.movey = 0
+            self.rect.y = worldy-ty-ty
 '''
 Setup
 '''
 
-backdrop = pygame.image.load(os.path.join('images', 'stage.png'))
+backdrop = pygame.image.load(os.path.join('img', 'sky.jpg'))
 clock = pygame.time.Clock()
 pygame.init()
 backdropbox = world.get_rect()
@@ -57,11 +65,6 @@ player.rect.y = 0  # go to y
 player_list = pygame.sprite.Group()
 player_list.add(player)
 
-
-'''
-Main Loop
-'''
-
 while main:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -70,14 +73,15 @@ while main:
                 sys.exit()
             finally:
                 main = False
-
-        if event.type == pygame.KEYDOWN:
-            if event.key == ord('q'):
-                pygame.quit()
-            try:
-                sys.exit()
-            finally:
-                main = False
+    key=pygame.key.get_pressed()
+    if key[pygame.K_a]== True:
+        player.move(-1,0)
+    elif key[pygame.K_w]== True:
+        player.move(0,-1)
+    elif key[pygame.K_s]== True:
+        player.move(0,1)
+    elif key[pygame.K_d]== True:
+        player.move(1,0)
     world.blit(backdrop, backdropbox)
     player_list.draw(world)
     pygame.display.flip()
